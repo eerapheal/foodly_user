@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter Multi-Vendor App - 探索多商家平台</title>
+    <meta name="description" content="Discover the ultimate Flutter-based multi-vendor app for web and Android and iOS. Easily register or use provided credentials to explore features like secure Stripe payments, vendor browsing, and food delivery services. 支持多商家平台，快速注册或使用提供的账号登录，体验安全支付、商家浏览和美食配送功能，完美适配网页和安卓端！">
+
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js" ></script>
+    <!-- need this for url base strategy-->
+    <base href="/" />
+    <!-- Firebase Messaging -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-messaging.js" ></script>
+    <script type="text/javascript">
+    window.flutterWebRenderer = "html";
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD2663o-Nefzh5loUvP1UJi2rKClNZtJdI" callback=initMap" async defer></script>
+    <script
+            type="application/javascript"
+            src="/assets/packages/flutter_inappwebview_web/assets/web/web_support.js"
+            defer
+    ></script>
+    <script src="https://js.stripe.com/v3/" async></script>
+    <script>
+  function redirectToStripeCheckout(sessionId) {
+    var stripe = Stripe("pk_test_51NDjUSDcNOyMHK5HOMCbBl0aRE5xqhvIkxlH327YMAW802xqAWi3kWkk8vrzGAw4Da2cRaCvAPCc5nmlwgn0d7WB00BtBDHUtC"); // Use your actual publishable key
+    stripe.redirectToCheckout({ sessionId: sessionId })
+      .then(function (result) {
+        if (result.error) {
+          alert(result.error.message);
+        }
+      });
+  }
+</script>
+    <script>
+  function setDynamicMeta(title, description) {
+    // Set the title
+    document.title = title;
+
+    // Update or create the description meta tag
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.name = 'description';
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.content = description;
+  }
+</script>
+
+    <script src="flutter.js"></script>
+    <style>
+        /* Add color constants */
+        :root {
+            --kPrimary: #30b9b2;
+            --kPrimaryLight: #40F3EA;
+            --kSecondary: #ff7a4f;
+            --kSecondaryLight: #ffe5db;
+            --kTertiary: #0078a6;
+        }
+
+        /* Loading animation container */
+        .loading-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Cards container */
+        .card-container {
+            position: relative;
+            width: 300px;
+            height: 100px;
+            overflow: hidden;
+        }
+
+        /* Card styling */
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--kPrimary);
+            color: #ffffff;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(100%);
+            animation: slideIn 3s ease-in-out forwards;
+            text-align:center;
+        }
+
+        /* Animation for sliding cards */
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+            10%, 90% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
+        }
+
+        /* Loading dots */
+        .loading-dots {
+            display: flex;
+            gap: 10px;
+        }
+
+        .loading-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: var(--kPrimary);
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        /* Animation delays for dots */
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.3s;
+            background-color: var(--kSecondary);
+        }
+
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.6s;
+            background-color: var(--kTertiary);
+        }
+
+        /* Pulse animation */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+<script src="main.dart.js"></script>
+<div id="flutter"></div>
+
+<!-- Custom Loading Indicator -->
+<script>
+           // Loading Animation
+        const loadingContainer = document.createElement('div');
+        loadingContainer.classList.add('loading-container');
+
+        // Card Container
+        const cardContainer = document.createElement('div');
+        cardContainer.classList.add('card-container');
+        loadingContainer.appendChild(cardContainer);
+
+        // Cards with Mottos
+        const mottos = [
+            ["Stay positive!", "Foodly is multi vendor app", "You can make money through it"],
+            ["If you have a shop you can upload food", "If you are a driver you can deliver food and make money", "Embrace the journey!"]
+        ];
+        let round = 0;
+
+        function createCards() {
+            cardContainer.innerHTML = ''; // Clear previous cards
+            mottos[round % mottos.length].forEach((text, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.textContent = text;
+                card.style.animationDelay = `${index * 3}s`;
+                cardContainer.appendChild(card);
+            });
+            round++;
+        }
+
+        createCards(); // Initial call
+        setInterval(createCards, mottos[0].length * 3000); // Repeat after showing all cards
+
+        // Loading Dots
+        const dotsContainer = document.createElement('div');
+        dotsContainer.classList.add('loading-dots');
+        for (let i = 0; i < 3; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('loading-dot');
+            dotsContainer.appendChild(dot);
+        }
+
+        loadingContainer.appendChild(dotsContainer);
+        document.body.appendChild(loadingContainer);
+
+        _flutter.loader.load({
+            onEntrypointLoaded: async function (engineInitializer) {
+                const appRunner = await engineInitializer.initializeEngine();
+                await appRunner.runApp();
+                document.body.removeChild(loadingContainer); // Remove once app runs
+            }
+        });
+    </script>
+<!-- Firebase App (the core Firebase SDK) -->
+<script>
+<!--Update with yours config-->
+  const firebaseConfig = {
+          apiKey: "AIzaSyBy0My66SO_S8p1BXajWuUQPiI_XRwQO7Y",
+          authDomain: "flutter-foodly-final-7d6ce.firebaseapp.com",
+          databaseURL: "https://flutter-foodly-final-7d6ce-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "flutter-foodly-final-7d6ce",
+          storageBucket: "flutter-foodly-final-7d6ce.appspot.com",
+          messagingSenderId: "478084903744",
+          appId: "1:478084903744:web:0ef129fa03529bd7c100a5"
+};
+  </script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      .then(function(registration) {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }).catch(function(err) {
+        console.error('Service Worker registration failed:', err.message, err);
+      });
+    }
+  </script>
+<script src="https://js.paystack.co/v1/inline.js?v=1.2.4"></script>
+<script>
+  function payWithPaystack(email, amount, reference) {
+    var handler = PaystackPop.setup({
+      key: 'pk_test_09272df110801d6678c101e0dd0262c46d31dd39',
+      email: email,
+      amount: amount,
+      ref: reference,
+      callback: function (response) {
+        console.log("Inside callback.");
+        console.log('Payment successful. Reference:', response.reference);
+
+        if (response.reference) {
+          console.log('Valid reference received:', response.reference);
+        } else {
+          console.error('No reference received from Paystack.');
+        }
+
+        console.log("Attempting to redirect...");
+        setTimeout(function () {
+          window.location.href = '/#/success';
+          console.log("Redirected to success page.");
+        }, 100);
+      },
+      onClose: function () {
+        alert('Transaction was not completed, window closed.');
+      },
+    });
+
+    handler.openIframe();
+    console.log("Handler initialized, iframe opened.");
+  }
+</script>
+
+</body>
+</html>

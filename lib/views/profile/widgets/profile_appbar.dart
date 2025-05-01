@@ -1,0 +1,79 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:foodly_user/common/app_style.dart';
+import 'package:foodly_user/constants/constants.dart';
+import 'package:foodly_user/constants/routes_names.dart';
+import 'package:foodly_user/controllers/location_controller.dart';
+import 'package:foodly_user/controllers/login_controller.dart';
+import 'package:get/get.dart';
+
+class ProfileAppBar extends StatelessWidget {
+  const ProfileAppBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.put(LoginController());
+    final location = Get.put(UserLocationController());
+    String countryName=location.userLocation.value.country.value;
+    if(countryName.isEmpty)countryName="Unknown";
+    return AppBar(
+      backgroundColor: const Color(0xFFFFFFFF),
+      elevation: 0,
+      leading: GestureDetector(
+        onTap: () {},
+        child: GestureDetector(
+          onTap: () {
+            controller.logout();
+          },
+          child: const Icon(
+            AntDesign.logout,
+            size: 18,
+          ),
+        ),
+      ),
+      actions: [
+        GestureDetector(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 5,
+                ),
+                Padding(
+                    padding: EdgeInsets.only(bottom: 4.h),
+                    child: Obx(() => RichText(
+                          text: TextSpan(
+                            style: appStyle(12, kDark, FontWeight.normal),
+                            // Default style for normal text
+                            children: <TextSpan>[
+                              const TextSpan(text: 'Currently @ ',style: TextStyle(color: kPrimary)),
+                              // Regular text before the variable
+                              TextSpan(
+                                text: location.userLocation.value.country.value,
+                                // The dynamic text
+                                style: appStyle(
+                                    12,
+                                    kSecondary,
+                                    FontWeight
+                                        .bold), // Bold style for the variable value
+                              ),
+                            ],
+                          ),
+                        ))),
+                const SizedBox(
+                  width: 10,
+                ),
+
+              ],
+            ),
+          ),
+        )
+      ],
+    );
+  }
+}

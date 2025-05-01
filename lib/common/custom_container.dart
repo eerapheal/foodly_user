@@ -1,0 +1,37 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foodly_user/constants/constants.dart';
+
+// ignore: must_be_immutable
+class CustomContainer extends StatelessWidget {
+  CustomContainer({
+    super.key,
+    this.containerContent,
+    this.color=kOffWhite,
+    this.containerHieght
+  });
+
+  Widget? containerContent;
+  Color? color;
+  double? containerHieght;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(0.r),
+          bottomRight: Radius.circular(0.r)),
+
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+
+        child: Container(
+          width: width,
+          height: ScreenUtil().screenHeight,
+          color: color,
+          child: SingleChildScrollView(child: containerContent),
+        ),
+      ),
+    );
+  }
+}
